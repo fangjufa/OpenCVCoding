@@ -5,3 +5,13 @@ OpenCVLearning/aa.jpg
 OpenCVLearning/aa.png
 OpenCVLearning/Debug/OpenCVLearning.log
 *.tlog
+.vs/OpenCVLearning/v14/.suo
+OpenCVLearning/OpenCVLearning.vcxproj
+OpenCVLearning/OpenCVLearning.vcxproj
+OpenCVLearning/OpenCVLearning.vcxproj.user
+OpenCVLearning/OpenCVLearning.vcxproj
+*.obj
+*.log
+*.idb
+*.pdb
+*.exe

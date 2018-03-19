@@ -21,7 +21,12 @@ void pickPoint(int event, int x, int y, int, void*)
 	{
 		return;
 	}
+
+	//erode(src,)
+
 	Point seed = Point(x, y);
+
+
 
 	int newMaskVal = 255;
 	Scalar newVal = Scalar(120, 120, 120);
@@ -30,11 +35,15 @@ void pickPoint(int event, int x, int y, int, void*)
 	int flags = connectivity + (newMaskVal << 8) + FLOODFILL_FIXED_RANGE + FLOODFILL_MASK_ONLY;
 
 	Mat mask2 = Mat::zeros(src.rows + 2, src.cols + 2, CV_8UC1);
+	//imshow("before", mask2);
 
+	//运算完之后，会对mask2矩阵造成影响，因为flag包含了FLOODFILL_MASK_ONLY,即只对掩模图像造成影响。
+	//mask2对应像素点的值为0，则纳入计算，会被填充，否则不被填充。
 	floodFill(src, mask2, seed, newVal, 0, Scalar(lo, lo, lo), Scalar(up, up, up), flags);
 	mask = mask2(Range(1, mask2.rows - 1), Range(1, mask2.cols - 1));
 
 	imshow("Mask", mask);
+	//imshow("After", src);
 
 	Hist_and_Backproj();
 }
@@ -52,11 +61,12 @@ void Hist_and_Backproj()
 
 	int channels[] = { 0, 1 };
 
-	/// Get the Histogram and normalize it  
+	/// Get the Histogram and normalize it 
+	//计算h_s的直方图，得到一个二维直方图。
 	calcHist(&hsv, 1, channels, mask, hist, 2, histSize, ranges, true, false);
 
 	normalize(hist, hist, 0, 255, NORM_MINMAX, -1, Mat());
-
+	//imshow("hist",hist);
 	/// Get Backprojection  
 	Mat backproj;
 	calcBackProject(&hsv, 1, channels, hist, backproj, ranges, 1, true);
@@ -67,7 +77,7 @@ void Hist_and_Backproj()
 	imshow("hand", hand);*/
 }
 
-int main()
+int skin_main()
 {
 	//VideoCapture cap(0); // open the default camera
 	//if (!cap.isOpened())  // check if we succeeded

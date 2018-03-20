@@ -4,8 +4,11 @@
 
 
 #include<opencv2\imgproc.hpp>
+#include<opencv2\core.hpp>
 using namespace cv;
 
 Mat CreateHist(Mat src, int bins, float* range);
+
+Mat CreateGradientImage(Mat img);
 
 #endif

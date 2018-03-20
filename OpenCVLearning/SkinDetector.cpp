@@ -30,7 +30,6 @@ void pickPoint(int event, int x, int y, int, void*)
 	int flags = connectivity + (newMaskVal << 8) + FLOODFILL_FIXED_RANGE + FLOODFILL_MASK_ONLY;
 
 	Mat mask2 = Mat::zeros(src.rows + 2, src.cols + 2, CV_8UC1);
-
 	floodFill(src, mask2, seed, newVal, 0, Scalar(lo, lo, lo), Scalar(up, up, up), flags);
 	mask = mask2(Range(1, mask2.rows - 1), Range(1, mask2.cols - 1));
 
@@ -67,7 +66,7 @@ void Hist_and_Backproj()
 	imshow("hand", hand);*/
 }
 
-int main()
+int skin_main()
 {
 	//VideoCapture cap(0); // open the default camera
 	//if (!cap.isOpened())  // check if we succeeded

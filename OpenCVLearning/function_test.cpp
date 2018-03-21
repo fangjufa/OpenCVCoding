@@ -2,7 +2,7 @@
 #include<opencv2\highgui.hpp>
 using namespace cv;
 
-int main()
+int func_main()
 {
 	Mat src = imread("hand02.jpg");
 	Mat erodeImg;

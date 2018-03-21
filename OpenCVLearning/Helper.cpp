@@ -47,22 +47,31 @@ Mat CreateGradientImage(Mat src)
 
 	//梯度矩阵，存放的是该像素点的梯度方向，大小是0～pi
 	Mat dst = Mat(src.rows,src.cols,CV_32FC2);
-	Mat xGradient,yGradient;
-	float xArr[] = {-1.f,0.f,1.f};
-	float yArr[] = { 1.f,0.f,-1.f };
+	Mat xGradient(Size(src.cols,src.rows),src.type()),yGradient(Size(src.cols, src.rows), src.type());
+	int xArr[] = {-1,0,1};
+	int yArr[] = { 1,0,-1 };
+	//Vec3f xArr = { -1.f,0.f,1.f };
+	//Vec3f yArr = { 1.f,0.f,-1.f };
 	Mat xKernel(1, 3, CV_32FC1, xArr);// = Mat(1, 3, CV_32FC1, xArr);
 	Mat yKernel(3, 1, CV_32FC1, yArr);// = Mat(3, 1, CV_32FC1, yArr);
-	filter2D(src, xGradient, 1, xKernel);
-	filter2D(src, yGradient, 1, yKernel);
+	filter2D(src, xGradient, -1, xKernel);
+	filter2D(src, yGradient, -1, yKernel);
 
 	for (int i = 0; i < src.cols; i++)
 	{
 		for (int j = 0; j < src.rows; j++)
 		{
-			float x = xKernel.at<float>(i, j);
-			float y = xKernel.at<float>(i, j);
-			dst.at<vector<float>>(i, j)[0] = sqrt(x*x+y*y);
-			dst.at<vector<float>>(i, j)[1] = cvFastArctan(y,x);
+			int* x= xGradient.ptr<int>(i, j);
+			int* y = yGradient.ptr<int>(i, j);
+			/*float x = xGradient.at<int>(i, j);
+			int y = yGradient.at<int>(i, j);*/
+			dst.at<Vec2f>(i, j)[0] = sqrt((*x)*(*x) + (*y)*(*y));
+			dst.at<Vec2f>(i, j)[1] = cvFastArctan((*y), (*x));
+			//Vec2f pixel;
+			////pixel = dst.at<vector<float>>(i, j);// [0] = 
+			//pixel..push_back(sqrt(x*x + y*y));
+			//pixel.push_back(cvFastArctan(y, x));
+			//dst.at<vector<float>>(i, j) = pixel;
 		}
 	}
 

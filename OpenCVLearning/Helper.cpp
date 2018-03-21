@@ -61,6 +61,8 @@ Mat CreateGradientImage(Mat src)
 	{
 		for (int j = 0; j < src.rows; j++)
 		{
+			if (j == 300)
+				int aa = j;
 			int* x= xGradient.ptr<int>(i, j);
 			int* y = yGradient.ptr<int>(i, j);
 			/*float x = xGradient.at<int>(i, j);
@@ -77,4 +79,34 @@ Mat CreateGradientImage(Mat src)
 
 	imshow("dst", dst);
 	return dst;
+}
+
+
+///该得出的结果貌似不太能用。
+void gradientGray(Mat &src, Mat &dst)
+{
+	const int H = src.rows, W = src.cols;
+	Mat Ix(H, W, CV_32S), Iy(H, W, CV_32S);
+	//因为计算出的梯度值可能有正有负，且值也可能会很大，故数据类型为整形  
+
+	// 求水平方向梯度，处理左右边缘像素  
+	for (int y = 0; y < H; y++) {
+		Ix.at<int>(y, 0) = abs(src.at<char>(y, 1) - src.at<char>(y, 0)) * 2;
+		for (int x = 1; x < W - 1; x++)
+			Ix.at<int>(y, x) = abs(src.at<char>(y, x + 1) - src.at<char>(y, x - 1));
+		Ix.at<int>(y, W - 1) = abs(src.at<char>(y, W - 1) - src.at<char>(y, W - 2)) * 2;
+	}
+	// 求垂直方向梯度，处理左右边缘像素  
+	for (int x = 0; x < W; x++) {
+		Iy.at<int>(0, x) = abs(src.at<char>(1, x) - src.at<char>(0, x)) * 2;
+		for (int y = 1; y < H - 1; y++)
+			Iy.at<int>(y, x) = abs(src.at<char>(y + 1, x) - src.at<char>(y - 1, x));
+		Iy.at<int>(H - 1, x) = abs(src.at<char>(H - 1, x) - src.at<char>(H - 2, x)) * 2;
+	}
+	//for (int j = 0; j < H; j++)
+	//	for (int k = 0; k < W; k++)
+	//	{
+	//		dst.at<char>(j, k) = min(Ix.at<int>(j,k) + Iy.at<int>(j, k), 255);
+	//	}
+	convertScaleAbs(min(Ix + Iy, 255), dst); //这句话和上面的for循环是同样的功能  
 }

@@ -11,4 +11,6 @@ Mat CreateHist(Mat src, int bins, float* range);
 
 Mat CreateGradientImage(Mat img);
 
+void gradientGray(Mat &src, Mat &dst);
+
 #endif

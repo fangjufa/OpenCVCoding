@@ -15,3 +15,11 @@ OpenCVLearning/OpenCVLearning.vcxproj
 *.idb
 *.pdb
 *.exe
+*.ilk
+*.vcxproj
+*.vcxproj
+*.filters
+*.iobj
+*.ipdb
+OpenCVLearning/OpenCVLearning.vcxproj.filters
+OpenCVLearning/OpenCVLearning.vcxproj

@@ -2,7 +2,6 @@
 #include<vector>
 #include<opencv2\highgui.hpp>
 
-using namespace std;
 
 Mat CreateHist(Mat src, int bins, float* range)
 {
@@ -109,4 +108,19 @@ void gradientGray(Mat &src, Mat &dst)
 	//		dst.at<char>(j, k) = min(Ix.at<int>(j,k) + Iy.at<int>(j, k), 255);
 	//	}
 	convertScaleAbs(min(Ix + Iy, 255), dst); //这句话和上面的for循环是同样的功能  
+}
+
+void findAndDrawContours(Mat image, vector<vector<Point>>& contours,vector<Vec4i>& hierarchy, 
+	int mode ,int method , Point offset)
+{
+	findContours(image, contours, hierarchy, mode, method, offset);
+
+	Mat contourImg(image.rows, image.cols, CV_8UC1);
+
+	for (int idx = 0; idx >= 0; idx = hierarchy[idx][0])
+	{
+		drawContours(contourImg, contours, idx, Scalar(255, 0, 255, 255),1,8,hierarchy);
+	}
+
+	imshow("contours", contourImg);
 }

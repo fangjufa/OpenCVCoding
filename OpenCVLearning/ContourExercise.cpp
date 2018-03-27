@@ -9,7 +9,7 @@
 using namespace std;
 using namespace cv;
 
-int main()
+int contour_main()
 {
 	//Mat src = imread("car.jpg",IMREAD_GRAYSCALE);
 
@@ -37,21 +37,40 @@ int main()
 	//imshow("Components", dst);
 	//waitKey(0);
 	
-	Mat src = imread("circle.jpg", IMREAD_GRAYSCALE);
-	Canny(src, src, 60, 128);
+	Mat src = imread("hand.jpg", IMREAD_GRAYSCALE);
+	Canny(src, src, 128, 200);
 	imshow("Canny", src);
 
 	vector<vector<Point>> contours;
 	vector<Vec4i> hierarchy;
-
+	cout << "contours length:" << contours.size() << endl;
+	cout << "hierarchy length:" << hierarchy.size() << endl;
 	findAndDrawContours(src, contours, hierarchy,CV_RETR_CCOMP);
-
+	cout << "contours length:" << contours.size() << endl;
+	cout << "hierarchy length:" << hierarchy.size() << endl;
 	for (int i = 0; i < contours.size(); i++)
 	{
 		double length = arcLength(contours[i], true);
 		cout <<i<< "ÂÖÀª³¤¶È" << length << endl;
 	}
 
+
+	vector<vector<Point>> poly(contours.size());
+
+	for (int i = 0; i < contours.size(); i++)
+	{
+		approxPolyDP(contours[i], poly[i], 0.1f, true);
+	}
+	RNG rng;
+	Mat contourImg = Mat::zeros(src.rows, src.cols, CV_8UC3);
+	for (int i = 0; i < poly.size(); i++)
+	{
+		//Scalar color = Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+		drawContours(contourImg, contours, i, Scalar(128,0,0,255), 1, 8, vector<Vec4i>(), 0, Point());
+		drawContours(contourImg, poly, i, Scalar(0, 0, 255, 255), 1, 8, vector<Vec4i>(), 0, Point());
+	}
+
+	imshow("approxPolyDP", contourImg);
 	//approxPolyDP()
 
 

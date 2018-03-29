@@ -1,16 +1,16 @@
-#include<opencv2\imgproc.hpp>
+ï»¿#include<opencv2\imgproc.hpp>
 #include<opencv2\highgui.hpp>
 //#include<opencv2\video.hpp>
 using namespace cv;
 
-int main()
+int local_main()
 {
-	//ÏÈÓÃÖ¡²îµÄ·½Ê½»ñÈ¡±³¾°£¬¼´ÓÃµ±Ç°Ö¡Í¼ÏñÖğÏñËØ¼õÈ¥ÉÏÒ»Ö¡Í¼Ïñ¡£
+	//å…ˆç”¨å¸§å·®çš„æ–¹å¼è·å–èƒŒæ™¯ï¼Œå³ç”¨å½“å‰å¸§å›¾åƒé€åƒç´ å‡å»ä¸Šä¸€å¸§å›¾åƒã€‚
 	VideoCapture vc;
 
 	if (!vc.open(0))
 	{
-		printf("´ò¿ªÉãÏñÍ·Ê§°Ü£¡");
+		printf("æ‰“å¼€æ‘„åƒå¤´å¤±è´¥ï¼");
 		return -1;
 	}
 

@@ -5,8 +5,8 @@
 using namespace std;
 using namespace cv;
 
-//int test_main()
-int main()
+int test_main()
+//int main()
 {
 	///测试梯度直方图
 	//Mat img = imread("hand02.jpg",IMREAD_COLOR);

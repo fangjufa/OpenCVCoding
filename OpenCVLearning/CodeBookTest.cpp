@@ -1,8 +1,11 @@
 ﻿#include<opencv2\imgproc.hpp>
 #include<opencv2\highgui.hpp>
+#include<opencv2\video.hpp>
+#include<vector>
 //#include<opencv2\>
 
 using namespace cv;
+using namespace std;
 
 ///定义codebook数据类型
 #define CHANNELS 3
@@ -22,6 +25,9 @@ typedef struct cb
 	int numEntries;
 	int t;
 }code_book;
+
+int minMode[] = { -10,-10,-10 };
+int maxMode[] = { -5,-5,-5 };
 
 ///逐像素更新codebook。
 ///其中p就是像素的指针，c是该像素上的codebook,cbBounds是一个偏移值。
@@ -156,7 +162,8 @@ uchar backGroundDiff(code_book& c,uchar* p,int* minMod,int* maxMod)
 	for (; i < c.numEntries; i++)
 	{
 		matchChannel = 0;
-		for (int n = 0; n < CHANNELS; n++)
+		int n = 0;
+		for (; n < CHANNELS; n++)
 		{
 			//这里的像素值比较又与前面不同，不知道为什么要这么做。
 			if (c.ces[i]->min[n] - minMod[n] <= *(p + n) &&
@@ -175,8 +182,88 @@ uchar backGroundDiff(code_book& c,uchar* p,int* minMod,int* maxMod)
 	return 0;
 }
 
+void onMinValueChange(int curValue,void*)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		minMode[i] = curValue;
+	}
+}
+
+void onMaxValueChange(int curValue, void*)
+{
+	for (int i = 0; i < 3; i++)
+	{
+		maxMode[i] = curValue;
+	}
+}
+
 int main()
 {
+	VideoCapture cap;
+	if (!cap.open(0))
+	{
+		return -1;
+	}
+
+	int index = 0;
+
+	Mat frame;
+	cap.read(frame);
+	int cols = frame.cols;
+	int rows = frame.rows;
+	Mat mask = Mat::zeros(rows,cols,CV_8UC1);
+
+	vector<vector<code_book>> cbs;
+	for (int i = 0; i < rows; i++)
+	{
+		vector<code_book> cbArray;
+		for (int j = 0; j < cols; j++)
+		{
+			code_book cb;
+			cb.ces = NULL;
+			cb.numEntries = 0;
+			cb.t = index;
+			cbArray.push_back(cb);
+		}
+		cbs.push_back(cbArray);
+	}
+	unsigned bounds[] = {10,10,10};
+
+	const string winName = "mask";
+	int minValue = 10;
+	int maxValue = 5;
+
+	namedWindow(winName);
+	createTrackbar("minMode", winName, &minValue, 200, onMinValueChange);
+	createTrackbar("maxMode", winName, &maxValue, 200, onMinValueChange);
 	
+	int accumulateFrame = 0;
+	int keyCode = 0;
+	while (keyCode != 27)
+	{
+		index++;
+		accumulateFrame++;
+		cap.read(frame);
+
+
+		for (int i = 0; i < frame.rows; i++)
+		{
+			for (int j = 0; j < frame.cols; j++)
+			{
+				cbs[i][j].t = index;
+				update_codebook(frame.ptr(i, j), cbs[i][j], bounds);
+				//积累满了50帧之后，才开始做背景差分的事情。
+				if (accumulateFrame > 50)
+				{
+					clearStaleEntries(cbs[i][j]);
+					mask.at<uchar>(i, j) = backGroundDiff(cbs[i][j], frame.ptr(i, j), minMode, maxMode);
+				}
+			}//end for j
+		}//end for i
+		imshow(winName, mask);
+		keyCode = waitKey(30);
+	}//end for while
+
 	return 0;
 }

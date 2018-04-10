@@ -120,7 +120,7 @@ void backgroundDiff(Mat src,Mat iMask)
 	subtract(iMask, 255, iMask);
 }
 
-int main()
+int avg_main()
 {
 	VideoCapture cap;
 	if (!cap.open(0))

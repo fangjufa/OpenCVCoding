@@ -42,12 +42,19 @@ int test_main()
 	//}
 
 	///测试convertTo函数
-	Mat src = imread("car.jpg", IMREAD_UNCHANGED);
-	printf("before type:%d.", src.type());
-	//Mat srcF = Mat::zeros(src.rows, src.cols, CV_32FC3);
-	src.convertTo(src, CV_32FC3, 1.0f/255.0);
-	printf("before type:%d.", src.type());
-	imshow("src", src);
+	//Mat src = imread("car.jpg", IMREAD_UNCHANGED);
+	//printf("before type:%d.", src.type());
+	////Mat srcF = Mat::zeros(src.rows, src.cols, CV_32FC3);
+	//src.convertTo(src, CV_32FC3, 1.0f/255.0);
+	//printf("before type:%d.", src.type());
+	//imshow("src", src);
+
+	///测试inpainting函数。
+	///该函数需要一个mask矩阵记录想要修复的像素位置，然后其余位置设为0.
+	Mat src = imread("curry.jpg");
+	inpaint(src, Mat(), src, 5, CV_INPAINT_TELEA);
+
+	imshow("inpaint", src);
 
 	int key = 0;
 	while (key != 27)

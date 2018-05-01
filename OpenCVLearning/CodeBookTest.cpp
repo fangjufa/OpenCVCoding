@@ -1,8 +1,17 @@
-﻿#include<opencv2\imgproc.hpp>
+﻿/*
+Code_Book方法区分背景和前景，其实该方法也依赖于前景是否运动。
+第一步是逐像素建立Codebook，然后对于该像素位置上每帧进来的值做判断，
+如果该值落在原先设定的阈值内，则修改一下条目的属性；如果没有落在阈值内，
+则新建一个条目。
+然后每隔一段时间要清理一下长时间没有像素值进入的条目，因为这样的条目有可能
+是噪点，这样能减少噪点对最终结果造成的影响。
+
+*/
+
+#include<opencv2\imgproc.hpp>
 #include<opencv2\highgui.hpp>
 #include<opencv2\video.hpp>
 #include<vector>
-//#include<opencv2\>
 
 using namespace cv;
 using namespace std;
@@ -31,8 +40,10 @@ int maxMode[] = { -5,-5,-5 };
 
 ///逐像素更新codebook。
 ///其中p就是像素的指针，c是该像素上的codebook,cbBounds是一个偏移值。
+///依经验来说(rule of thumb),cbBounds取值为10适宜。
 void update_codebook(uchar* p, code_book& c, unsigned* cbBounds)
 {
+	//定义上下界，判断像素值是否在该条目内就是用这个值。
 	uint low[CHANNELS], high[CHANNELS];
 	for (int i = 0; i < CHANNELS; i++)
 	{
@@ -168,6 +179,7 @@ uchar backGroundDiff(code_book& c,uchar* p,int* minMod,int* maxMod)
 			//这里的像素值比较又与前面不同，不知道为什么要这么做。
 			if (c.ces[i]->min[n] - minMod[n] <= *(p + n) &&
 				c.ces[i]->max[n] + maxMod[n] >= *(p + n))
+			//if(c.ces[i]->learnHigh[n] >= *(p+n) && c.ces[i]->learnLow[n] <= *(p + n))
 				matchChannel++;
 			else
 				break;
@@ -186,7 +198,7 @@ void onMinValueChange(int curValue,void*)
 {
 	for (int i = 0; i < 3; i++)
 	{
-		minMode[i] = curValue;
+		minMode[i] = -curValue;
 	}
 }
 
@@ -194,10 +206,11 @@ void onMaxValueChange(int curValue, void*)
 {
 	for (int i = 0; i < 3; i++)
 	{
-		maxMode[i] = curValue;
+		maxMode[i] = -curValue;
 	}
 }
 
+//int code_book_main()
 int main()
 {
 	VideoCapture cap;
@@ -206,7 +219,7 @@ int main()
 		return -1;
 	}
 
-	int index = 0;
+	//int index = 0;
 
 	Mat frame;
 	cap.read(frame);
@@ -223,11 +236,12 @@ int main()
 			code_book cb;
 			cb.ces = NULL;
 			cb.numEntries = 0;
-			cb.t = index;
+			cb.t = 0;
 			cbArray.push_back(cb);
 		}
 		cbs.push_back(cbArray);
 	}
+	///经验来讲，对于每个通道，该值一般取10.
 	unsigned bounds[] = {10,10,10};
 
 	const string winName = "mask";
@@ -239,11 +253,14 @@ int main()
 	createTrackbar("maxMode", winName, &maxValue, 200, onMinValueChange);
 	
 	int accumulateFrame = 0;
+	//隔多少帧清理一遍。
+	int clearInterval = 0;
 	int keyCode = 0;
 	while (keyCode != 27)
 	{
-		index++;
+		//index++;
 		accumulateFrame++;
+		clearInterval++;
 		cap.read(frame);
 
 
@@ -251,13 +268,18 @@ int main()
 		{
 			for (int j = 0; j < frame.cols; j++)
 			{
-				cbs[i][j].t = index;
+				cbs[i][j].t = accumulateFrame;
 				update_codebook(frame.ptr(i, j), cbs[i][j], bounds);
 				//积累满了50帧之后，才开始做背景差分的事情。
-				if (accumulateFrame > 50)
+				if (accumulateFrame > 25)
 				{
 					clearStaleEntries(cbs[i][j]);
 					mask.at<uchar>(i, j) = backGroundDiff(cbs[i][j], frame.ptr(i, j), minMode, maxMode);
+				}
+				if (clearInterval >= 10)
+				{
+					clearStaleEntries(cbs[i][j]);
+					clearInterval = 0;
 				}
 			}//end for j
 		}//end for i
